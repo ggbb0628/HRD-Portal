@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mySUNI 경영관리역량 오프라인 과정 운영 시스템</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange:#E05C2A; --orange-light:#FFF0E9; --orange-mid:#F6C5A8;
+    --orange-dark:#B84218; --amber:#F0A500;
+    --text-primary:#1A1714; --text-secondary:#6B6560; --text-muted:#A89F94;
+    --border:#EDE8E2; --bg:#F9F7F5; --white:#FFFFFF; --sidebar-w:230px;
+  }
+  body { font-family:'Pretendard',-apple-system,sans-serif; background:var(--bg); color:var(--text-primary); min-height:100vh; display:flex; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--white); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:10; }
+  .sidebar-logo { padding:1.4rem 1.25rem 1.2rem; border-bottom:1px solid var(--border); }
+  .logo-tag { font-size:10px; font-weight:700; letter-spacing:0.1em; color:var(--orange); text-transform:uppercase; margin-bottom:5px; }
+  .logo-title { font-size:13.5px; font-weight:800; color:var(--text-primary); line-height:1.4; }
+  .sidebar-nav { padding:1rem 0.75rem; flex:1; overflow-y:auto; }
+  .nav-section-label { font-size:10px; font-weight:700; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase; padding:0 0.5rem; margin:1rem 0 0.4rem; }
+  .nav-section-label:first-child { margin-top:0; }
+  .nav-item { display:flex; align-items:center; padding:9px 10px; border-radius:8px; font-size:13px; font-weight:500; color:var(--text-secondary); cursor:pointer; transition:all 0.15s; margin-bottom:2px; border:none; background:none; width:100%; text-align:left; }
+  .nav-item:hover { background:var(--orange-light); color:var(--orange-dark); }
+  .nav-item.active { background:var(--orange-light); color:var(--orange); font-weight:700; }
+  .sidebar-footer { padding:1rem 1.25rem; border-top:1px solid var(--border); font-size:11.5px; color:var(--text-muted); }
+
+  /* ── TOPBAR & MAIN ── */
+  .main { margin-left:var(--sidebar-w); flex:1; min-height:100vh; display:flex; flex-direction:column; }
+  .topbar { background:var(--white); border-bottom:1px solid var(--border); padding:0 2rem; height:54px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; }
+  .topbar-title { font-size:14px; font-weight:600; color:var(--text-primary); }
+  .topbar-pill { font-size:11.5px; font-weight:700; padding:4px 12px; border-radius:20px; background:var(--orange-light); color:var(--orange); }
+  .content { padding:2rem; flex:1; }
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ── HOME ── */
+  .home-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.5rem; gap:1rem; }
+  .home-top h2 { font-size:22px; font-weight:800; letter-spacing:-0.02em; color:var(--text-primary); }
+  .home-top p { font-size:13.5px; color:var(--text-secondary); margin-top:3px; }
+  .add-btn { display:flex; align-items:center; gap:6px; padding:9px 16px; font-size:13px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--orange); color:white; border:none; border-radius:10px; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:opacity 0.15s; }
+  .add-btn:hover { opacity:0.85; }
+  .course-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:1.25rem; }
+  .course-card { background:var(--white); border-radius:16px; border:1px solid var(--border); overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.04); cursor:pointer; transition:transform 0.18s,box-shadow 0.18s; }
+  .course-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(224,92,42,0.12); }
+  .course-card-top { background:linear-gradient(120deg,#C94E1F 0%,#E8992A 100%); padding:1.2rem 1.4rem; }
+  .card-top-row { display:flex; justify-content:space-between; align-items:flex-start; }
+  .card-course-title { font-size:16px; font-weight:800; color:white; line-height:1.3; letter-spacing:-0.02em; }
+  .pill-badge { display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:700; background:rgba(255,255,255,0.22); color:white; padding:3px 10px; border-radius:100px; border:1px solid rgba(255,255,255,0.35); white-space:nowrap; flex-shrink:0; }
+  .pill-badge::before { content:'●'; font-size:6px; opacity:0.8; }
+  .course-card-body { padding:1.1rem 1.4rem 1.25rem; }
+  .card-meta { display:flex; flex-direction:column; gap:5px; margin-bottom:1rem; }
+  .card-meta-row { font-size:12.5px; color:var(--text-secondary); }
+  .card-mini-progress { display:flex; gap:4px; align-items:center; margin-top:0.75rem; }
+  .mini-dot { width:8px; height:8px; border-radius:50%; background:var(--border); }
+  .mini-dot.done { background:var(--orange); }
+  .mini-dot.current { background:white; border:2px solid var(--orange); box-shadow:0 0 0 2px var(--orange-light); }
+  .mini-progress-label { font-size:11px; color:var(--text-muted); margin-left:4px; }
+
+  /* ── MODAL ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--white); border-radius:18px; padding:2rem; width:480px; max-width:90vw; box-shadow:0 16px 48px rgba(0,0,0,0.15); }
+  .modal-title { font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:1.5rem; }
+  .modal-field { margin-bottom:1rem; }
+  .modal-field label { display:block; font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:5px; }
+  .modal-field input { width:100%; padding:9px 12px; font-size:13.5px; font-family:'Pretendard',sans-serif; border:1.5px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text-primary); outline:none; }
+  .modal-field input:focus { border-color:var(--orange); box-shadow:0 0 0 3px rgba(224,92,42,0.1); }
+  .modal-row { display:flex; gap:0.75rem; }
+  .modal-row .modal-field { flex:1; }
+  .modal-btns { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; }
+  .modal-cancel { padding:9px 18px; font-size:13px; font-weight:600; font-family:'Pretendard',sans-serif; background:var(--bg); border:1.5px solid var(--border); border-radius:8px; cursor:pointer; color:var(--text-secondary); }
+  .modal-submit { padding:9px 18px; font-size:13px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--orange); color:white; border:none; border-radius:8px; cursor:pointer; }
+
+  /* ── DETAIL ── */
+  .back-btn { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--text-secondary); background:none; border:none; cursor:pointer; padding:6px 0; margin-bottom:1.25rem; transition:color 0.15s; }
+  .back-btn:hover { color:var(--orange); }
+  .detail-header { background:linear-gradient(120deg,#C94E1F 0%,#E8992A 100%); border-radius:16px; padding:2rem 2.5rem; margin-bottom:1.5rem; box-shadow:0 4px 20px rgba(200,78,31,0.2); }
+  .detail-header .pill-badge { margin-bottom:12px; }
+  .detail-title { font-size:26px; font-weight:900; color:white; letter-spacing:-0.03em; line-height:1.2; margin-bottom:8px; }
+  .detail-meta-row { display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:1rem; }
+  .detail-meta-item { display:flex; flex-direction:column; gap:2px; }
+  .detail-meta-label { font-size:10px; font-weight:700; letter-spacing:0.07em; color:rgba(255,255,255,0.6); text-transform:uppercase; }
+  .detail-meta-value { font-size:14px; font-weight:700; color:white; }
+  .detail-card { background:var(--white); border-radius:16px; border:1px solid var(--border); padding:1.75rem 2rem; margin-bottom:1.25rem; box-shadow:0 1px 8px rgba(0,0,0,0.03); }
+  .detail-card-title { font-size:13px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:1.25rem; }
+
+  /* PROCESS BAR */
+  .process-bar { display:flex; align-items:flex-start; }
+  .process-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+  .process-step:not(:last-child)::after { content:''; position:absolute; top:14px; left:50%; width:100%; height:2px; background:var(--border); z-index:0; }
+  .process-step.done:not(:last-child)::after { background:var(--orange); }
+  .step-dot { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:var(--white); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--text-muted); position:relative; z-index:1; transition:all 0.2s; }
+  .process-step.clickable .step-dot { cursor:pointer; }
+  .process-step.clickable .step-dot:hover { border-color:var(--orange); background:var(--orange-light); }
+  .process-step.done .step-dot { background:var(--orange); border-color:var(--orange); color:white; }
+  .process-step.current .step-dot { border-color:var(--orange); color:var(--orange); box-shadow:0 0 0 4px var(--orange-light); }
+  .step-name { font-size:11px; font-weight:600; color:var(--text-muted); margin-top:6px; text-align:center; line-height:1.3; }
+  .process-step.done .step-name, .process-step.current .step-name { color:var(--orange-dark); }
+  .process-step.clickable .step-name { text-decoration:underline dotted var(--orange-mid); cursor:pointer; }
+
+  .stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  .stat-card { background:var(--bg); border-radius:12px; padding:1rem 1.25rem; border:1px solid var(--border); }
+  .stat-num { font-size:26px; font-weight:800; color:var(--orange); letter-spacing:-0.03em; }
+  .stat-desc { font-size:12px; color:var(--text-muted); margin-top:2px; font-weight:500; }
+
+  /* ── SUB-TABS (응답폼 / raw 수합) ── */
+  .sub-tab-bar { display:flex; gap:4px; margin-bottom:1.5rem; background:var(--white); border:1px solid var(--border); border-radius:12px; padding:4px; width:fit-content; }
+  .sub-tab { padding:7px 20px; border-radius:8px; font-size:13px; font-weight:600; color:var(--text-muted); cursor:pointer; border:none; background:none; font-family:'Pretendard',sans-serif; transition:all 0.15s; }
+  .sub-tab.active { background:var(--orange); color:white; }
+  .sub-tab:not(.active):hover { background:var(--orange-light); color:var(--orange); }
+  .sub-panel { display:none; }
+  .sub-panel.active { display:block; }
+
+  /* RAW DATA TABLE */
+  .raw-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+  .raw-header-title { font-size:15px; font-weight:700; color:var(--text-primary); }
+  .raw-count { font-size:12px; color:var(--text-muted); }
+  .raw-export-btn { padding:7px 14px; font-size:12px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--bg); border:1.5px solid var(--border); border-radius:8px; cursor:pointer; color:var(--text-secondary); transition:all 0.15s; }
+  .raw-export-btn:hover { border-color:var(--orange); color:var(--orange); }
+  .raw-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); }
+  .raw-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .raw-table th { background:var(--bg); padding:10px 14px; text-align:left; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .raw-table td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text-secondary); vertical-align:middle; }
+  .raw-table tr:last-child td { border-bottom:none; }
+  .raw-table tr:hover td { background:var(--orange-light); }
+  .raw-empty { padding:3rem; text-align:center; color:var(--text-muted); font-size:13.5px; }
+
+  /* FORM */
+  .page-header { display:flex; align-items:center; gap:1rem; margin-bottom:1.75rem; }
+  .page-header h2 { font-size:20px; font-weight:800; color:var(--text-primary); letter-spacing:-0.02em; margin-bottom:4px; }
+  .page-header p { font-size:13.5px; color:var(--text-secondary); line-height:1.6; }
+  .form-card { background:var(--white); border-radius:16px; border:1px solid var(--border); padding:1.75rem 2rem; margin-bottom:1.25rem; box-shadow:0 1px 8px rgba(0,0,0,0.03); }
+  .section-title { font-size:16px; font-weight:800; color:var(--orange-dark); margin-bottom:1.25rem; display:flex; align-items:center; gap:8px; }
+  .section-title::after { content:''; flex:1; height:1.5px; background:linear-gradient(90deg,var(--orange-mid),transparent); }
+  .field { margin-bottom:1.15rem; }
+  .field:last-child { margin-bottom:0; }
+  .field label { display:block; font-size:13.5px; font-weight:600; color:var(--text-primary); margin-bottom:6px; }
+  .required { color:var(--orange); margin-left:2px; }
+  .hint { font-size:12px; color:var(--text-muted); margin-bottom:7px; line-height:1.5; }
+  .field input[type=text], .field input[type=email], .field textarea { width:100%; padding:10px 14px; font-size:14px; font-family:'Pretendard',sans-serif; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text-primary); outline:none; transition:border-color 0.15s,box-shadow 0.15s; resize:vertical; }
+  .field input:focus, .field textarea:focus { border-color:var(--orange); box-shadow:0 0 0 3px rgba(224,92,42,0.1); background:var(--white); }
+  .field input::placeholder, .field textarea::placeholder { color:#C9C3BB; }
+  .radio-group { display:flex; flex-direction:column; gap:7px; margin-top:4px; }
+  .radio-item { display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:500; color:var(--text-primary); cursor:pointer; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); transition:all 0.15s; }
+  .radio-item:hover { border-color:var(--orange); background:var(--orange-light); }
+  .radio-item input[type=radio] { accent-color:var(--orange); width:15px; height:15px; flex-shrink:0; }
+  .tbd-box { border:1.5px dashed var(--orange-mid); border-radius:10px; padding:1.1rem 1.5rem; background:var(--orange-light); text-align:center; }
+  .tbd-label { font-size:11px; font-weight:700; color:var(--orange); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px; }
+  .tbd-box p { font-size:12.5px; color:var(--text-secondary); }
+  .q-category { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:3px; }
+  .q-num { display:inline-block; font-size:11px; font-weight:800; background:var(--orange); color:white; padding:2px 8px; border-radius:6px; margin-bottom:7px; }
+  .q-title { font-size:14px; font-weight:600; color:var(--text-primary); margin-bottom:10px; line-height:1.5; }
+  .btn-row { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; }
+  .btn { padding:10px 24px; font-size:14px; font-weight:700; font-family:'Pretendard',sans-serif; border:none; border-radius:10px; cursor:pointer; transition:all 0.15s; }
+  .btn-primary { background:linear-gradient(90deg,var(--orange),var(--amber)); color:white; }
+  .btn-primary:hover { opacity:0.88; }
+  .btn-secondary { background:var(--bg); color:var(--text-secondary); border:1.5px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--orange); color:var(--orange); }
+  .coming-soon { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:240px; text-align:center; gap:10px; }
+  .coming-soon .cs-icon { font-size:34px; }
+  .coming-soon .cs-title { font-size:17px; font-weight:700; color:var(--text-secondary); }
+  .coming-soon p { font-size:13px; color:var(--text-muted); line-height:1.6; max-width:280px; }
+
+  /* SHARE CARD */
+  .share-card { background:var(--white); border-radius:16px; border:1px solid var(--border); padding:1.5rem 2rem; margin-bottom:1.25rem; box-shadow:0 1px 8px rgba(0,0,0,0.03); }
+  .share-title { font-size:13px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:1.1rem; }
+  .share-row { display:flex; gap:1.25rem; align-items:flex-start; flex-wrap:wrap; }
+  .share-url-block { flex:1; min-width:200px; }
+  .share-url-label { font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; }
+  .share-url-input-row { display:flex; gap:8px; }
+  .share-url-input { flex:1; padding:9px 12px; font-size:13px; font-family:monospace; border:1.5px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text-secondary); outline:none; }
+  .share-copy-btn { padding:9px 14px; font-size:12px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--orange-light); color:var(--orange); border:1.5px solid var(--orange-mid); border-radius:8px; cursor:pointer; white-space:nowrap; transition:all 0.15s; }
+  .share-copy-btn:hover { background:var(--orange); color:white; }
+  .share-copy-btn.copied { background:#E6F4EA; color:#2E7D32; border-color:#A5D6A7; }
+  .share-divider { width:1px; background:var(--border); align-self:stretch; }
+  .share-qr-block { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .qr-box { width:96px; height:96px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .qr-box canvas { display:block; }
+  .qr-label { font-size:11px; font-weight:600; color:var(--text-muted); }
+  .qr-download-btn { font-size:11px; font-weight:700; color:var(--orange); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0; }
+
+  /* ── EDITOR MODE ── */
+  .page-top-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; }
+  .page-top-row .page-header { margin-bottom:0; }
+  .edit-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; font-size:13px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--bg); border:1.5px solid var(--border); border-radius:9px; cursor:pointer; color:var(--text-secondary); transition:all 0.15s; white-space:nowrap; }
+  .edit-btn:hover { border-color:var(--orange); color:var(--orange); }
+  .edit-btn.editing { background:var(--orange); color:white; border-color:var(--orange); }
+  .edit-mode-bar { display:none; align-items:center; justify-content:space-between; background:var(--orange-light); border:1.5px solid var(--orange-mid); border-radius:10px; padding:10px 16px; margin-bottom:1.25rem; }
+  .edit-mode-bar.show { display:flex; }
+  .edit-mode-label { font-size:13px; font-weight:700; color:var(--orange-dark); }
+  .edit-mode-actions { display:flex; gap:8px; }
+  .add-field-btn { padding:6px 14px; font-size:12px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--orange); color:white; border:none; border-radius:7px; cursor:pointer; }
+  /* editable field wrapper */
+  .editable-field { position:relative; }
+  .field-edit-controls { display:none; position:absolute; top:0; right:0; gap:4px; }
+  .editing-on .field-edit-controls { display:flex; }
+  .editing-on .editable-field { padding-right:80px; }
+  .fc-btn { padding:3px 8px; font-size:11px; font-weight:700; font-family:'Pretendard',sans-serif; border:none; border-radius:5px; cursor:pointer; }
+  .fc-edit { background:#E6F1FB; color:#185FA5; }
+  .fc-del  { background:#FDECEA; color:#C62828; }
+  /* inline edit overlay */
+  .field-edit-overlay { display:none; background:var(--white); border:2px solid var(--orange); border-radius:12px; padding:1.1rem 1.25rem; margin-bottom:0.75rem; }
+  .field-edit-overlay.open { display:block; }
+  .feo-row { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+  .feo-row label { font-size:12px; font-weight:600; color:var(--text-secondary); }
+  .feo-row input, .feo-row select, .feo-row textarea { padding:7px 10px; font-size:13px; font-family:'Pretendard',sans-serif; border:1.5px solid var(--border); border-radius:7px; background:var(--bg); outline:none; width:100%; }
+  .feo-row input:focus, .feo-row select:focus, .feo-row textarea:focus { border-color:var(--orange); }
+  .feo-actions { display:flex; justify-content:flex-end; gap:6px; }
+  .feo-save { padding:6px 16px; font-size:12px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--orange); color:white; border:none; border-radius:7px; cursor:pointer; }
+  .feo-cancel { padding:6px 14px; font-size:12px; font-weight:600; font-family:'Pretendard',sans-serif; background:var(--bg); border:1.5px solid var(--border); border-radius:7px; cursor:pointer; color:var(--text-secondary); }
+  /* add field modal */
+  .add-field-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:200; align-items:center; justify-content:center; }
+  .add-field-modal.open { display:flex; }
+  .afm-box { background:var(--white); border-radius:16px; padding:1.75rem; width:440px; max-width:90vw; box-shadow:0 12px 40px rgba(0,0,0,0.14); }
+  .afm-title { font-size:16px; font-weight:800; color:var(--text-primary); margin-bottom:1.25rem; }
+  .afm-row { margin-bottom:0.9rem; }
+  .afm-row label { display:block; font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:5px; }
+  .afm-row input, .afm-row select, .afm-row textarea { width:100%; padding:8px 11px; font-size:13.5px; font-family:'Pretendard',sans-serif; border:1.5px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text-primary); outline:none; }
+  .afm-row input:focus, .afm-row select:focus, .afm-row textarea:focus { border-color:var(--orange); }
+  .afm-btns { display:flex; justify-content:flex-end; gap:8px; margin-top:1.25rem; }
+  .afm-cancel { padding:8px 16px; font-size:13px; font-weight:600; font-family:'Pretendard',sans-serif; background:var(--bg); border:1.5px solid var(--border); border-radius:8px; cursor:pointer; color:var(--text-secondary); }
+  .afm-add { padding:8px 18px; font-size:13px; font-weight:700; font-family:'Pretendard',sans-serif; background:var(--orange); color:white; border:none; border-radius:8px; cursor:pointer; }
+
+  /* ── SIDEBAR PROFILE ── */
+  .sidebar-profile { padding:1.5rem 1.25rem 1.25rem; border-bottom:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .profile-avatar-wrap { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#C94E1F,#E8992A); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden; border:2px solid var(--orange-mid); transition:box-shadow 0.2s; flex-shrink:0; }
+  .profile-avatar-wrap:hover { box-shadow:0 0 0 3px var(--orange-light); }
+  #profile-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+  .profile-add-label { font-size:9px; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:0.03em; text-align:center; line-height:1.2; }
+  .profile-hover-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.38); display:none; align-items:center; justify-content:center; font-size:18px; border-radius:50%; }
+  .profile-avatar-wrap:hover .profile-hover-overlay { display:flex; }
+  .profile-name { font-size:14px; font-weight:800; color:var(--text-primary); cursor:pointer; border-bottom:1px dashed transparent; transition:border-color 0.15s; letter-spacing:-0.01em; }
+  .profile-name:hover { border-bottom-color:var(--orange); color:var(--orange); }
+  .profile-role { font-size:11px; color:var(--text-muted); font-weight:500; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-profile">
+    <div class="profile-avatar-wrap" onclick="document.getElementById('avatar-input').click()" title="사진 변경">
+      <img id="profile-img" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;"/>
+      <div id="profile-placeholder">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="8" r="4" fill="#F6C5A8"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#F6C5A8" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="profile-add-label">사진 추가</span>
+      </div>
+      <div class="profile-hover-overlay">📷</div>
+    </div>
+    <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="setAvatar(this)"/>
+    <div class="profile-name" id="profile-name" onclick="editProfileName()" title="이름 수정">써니씨</div>
+    <div class="profile-role">과정 운영 담당자</div>
+  </div>
+  <div class="sidebar-logo">
+    <div class="logo-tag">mySUNI · HRD</div>
+    <div class="logo-title">경영관리역량<br>오프라인 과정<br>운영 시스템</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">홈</div>
+    <button class="nav-item active" onclick="showPage('home',this)">전체 과정</button>
+    <div class="nav-section-label" id="nav-course-label" style="display:none">과정 관리</div>
+    <button class="nav-item" id="nav-basicinfo"    style="display:none" onclick="showPage('basicinfo',this)">기본 정보</button>
+    <button class="nav-item" id="nav-presurvey"    style="display:none" onclick="showPage('presurvey',this)">사전 서베이</button>
+    <button class="nav-item" id="nav-satisfaction" style="display:none" onclick="showPage('satisfaction',this)">만족도 조사</button>
+    <button class="nav-item" id="nav-postsurvey"   style="display:none" onclick="showPage('postsurvey',this)">사후 서베이</button>
+  </nav>
+  <div class="sidebar-footer">© 2026 mySUNI 경영관리역량</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">전체 과정</span>
+    <span class="topbar-pill">mySUNI 경영관리역량</span>
+  </div>
+  <div class="content">
+
+    <!-- ── HOME ── -->
+    <div class="page active" id="page-home">
+      <div class="home-top">
+        <div><h2>오프라인 과정 목록</h2><p>운영 중이거나 예정된 과정을 확인하고 관리하세요.</p></div>
+        <button class="add-btn" onclick="openModal()">＋ 과정 추가</button>
+      </div>
+      <div class="course-grid" id="course-grid">
+        <div class="course-card" onclick="enterCourse('AI 기반 경영전략 수립','전략과정','2026.08.04 – 08.06','3일','수송스퀘어 중강의장2','30명 예정')">
+          <div class="course-card-top">
+            <div class="card-top-row">
+              <div class="card-course-title">AI 기반 경영전략 수립</div>
+              <div class="pill-badge">전략과정</div>
+            </div>
+          </div>
+          <div class="course-card-body">
+            <div class="card-meta">
+              <div class="card-meta-row">📅 2026.08.04 – 08.06 (3일)</div>
+              <div class="card-meta-row">📍 수송스퀘어 중강의장2</div>
+              <div class="card-meta-row">👥 30명 입과 예정</div>
+            </div>
+            <div class="card-mini-progress">
+              <div class="mini-dot current"></div>
+              <div class="mini-dot"></div><div class="mini-dot"></div>
+              <div class="mini-dot"></div><div class="mini-dot"></div>
+              <span class="mini-progress-label">정보수집 진행 중</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COURSE DETAIL ── -->
+    <div class="page" id="page-detail">
+      <button class="back-btn" onclick="goBack()">← 전체 과정으로</button>
+      <div class="detail-header">
+        <div class="pill-badge" id="detail-badge">전략과정</div>
+        <div class="detail-title" id="detail-title">AI 기반 경영전략 수립</div>
+        <div class="detail-meta-row">
+          <div class="detail-meta-item"><span class="detail-meta-label">과정 기간</span><span class="detail-meta-value" id="detail-period">2026.08.04 – 08.06</span></div>
+          <div class="detail-meta-item"><span class="detail-meta-label">일수</span><span class="detail-meta-value" id="detail-days">3일</span></div>
+          <div class="detail-meta-item"><span class="detail-meta-label">장소</span><span class="detail-meta-value" id="detail-place">수송스퀘어 중강의장2</span></div>
+          <div class="detail-meta-item"><span class="detail-meta-label">입과 인원</span><span class="detail-meta-value" id="detail-people">30명 예정</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-title">과정 진행 단계</div>
+        <div class="process-bar">
+          <div class="process-step current clickable" onclick="goToStep('basicinfo')">
+            <div class="step-dot">1</div><div class="step-name">기본정보<br>수집</div>
+          </div>
+          <div class="process-step clickable" onclick="goToStep('presurvey')">
+            <div class="step-dot">2</div><div class="step-name">사전<br>서베이</div>
+          </div>
+          <div class="process-step">
+            <div class="step-dot">3</div><div class="step-name">과정<br>진행</div>
+          </div>
+          <div class="process-step clickable" onclick="goToStep('satisfaction')">
+            <div class="step-dot">4</div><div class="step-name">만족도<br>조사</div>
+          </div>
+          <div class="process-step clickable" onclick="goToStep('postsurvey')">
+            <div class="step-dot">5</div><div class="step-name">사후<br>서베이</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card-title">제출 현황</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num">0<span style="font-size:16px;color:var(--text-muted)">/30</span></div><div class="stat-desc">기본정보 제출</div></div>
+          <div class="stat-card"><div class="stat-num">0<span style="font-size:16px;color:var(--text-muted)">/30</span></div><div class="stat-desc">사전 서베이 완료</div></div>
+          <div class="stat-card"><div class="stat-num">D-41</div><div class="stat-desc">과정 시작까지</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 기본정보 · 지원필요사항 ── -->
+    <div class="page" id="page-basicinfo">
+      <button class="back-btn" onclick="goToDetail()">← 과정 관리로</button>
+      <div class="page-top-row">
+        <div class="page-header">
+        <div><h2>기본 정보</h2><p>입과자 기본 인적사항 및 지원 필요사항을 관리합니다.</p></div>
+        <button class="edit-btn" id="editbtn-basicinfo" onclick="toggleEdit('basicinfo')" title="편집 모드">✏️ 수정하기</button>
+      </div>
+      <div class="edit-mode-bar" id="editbar-basicinfo">
+        <span class="edit-mode-label">✏️ 편집 모드 — 항목을 수정·삭제하거나 새 항목을 추가할 수 있습니다</span>
+        <div class="edit-mode-actions"><button class="add-field-btn" onclick="openAddField('basicinfo')">＋ 항목 추가</button></div>
+      </div>
+      </div>
+      <div class="sub-tab-bar">
+        <button class="sub-tab active" onclick="switchSubTab('basicinfo','form',this)">📝 응답 페이지</button>
+        <button class="sub-tab" onclick="switchSubTab('basicinfo','raw',this)">📊 수합 데이터</button>
+      </div>
+      <div class="sub-panel active" id="basicinfo-form">
+        <div class="share-card">
+          <div class="share-title">배포 링크 · QR 코드</div>
+          <div class="share-row">
+            <div class="share-url-block">
+              <div class="share-url-label">페이지 URL</div>
+              <div class="share-url-input-row">
+                <input class="share-url-input" id="url-basicinfo" readonly value="GitHub Pages 배포 후 자동 생성됩니다"/>
+                <button class="share-copy-btn" onclick="copyUrl('url-basicinfo',this)">복사</button>
+              </div>
+            </div>
+            <div class="share-divider"></div>
+            <div class="share-qr-block">
+              <div class="qr-box" id="qr-basicinfo"></div>
+              <div class="qr-label">QR 코드</div>
+              <button class="qr-download-btn" onclick="downloadQR('qr-basicinfo','기본정보_지원필요사항')">이미지 저장</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="section-title">A. 기본 인적사항</div>
+          <div class="editable-field" id="basicinfo-f0"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('basicinfo-f0')">수정</button><button class="fc-btn fc-del" onclick="delField('basicinfo-f0')">삭제</button></div>
+          <div class="field"><label>이름 <span class="required">*</span></label><input type="text" placeholder="홍길동"/></div>
+          <div class="editable-field" id="basicinfo-f1"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('basicinfo-f1')">수정</button><button class="fc-btn fc-del" onclick="delField('basicinfo-f1')">삭제</button></div>
+          <div class="field"><label>소속 회사 <span class="required">*</span></label><input type="text" placeholder="(주)회사명"/></div>
+          <div class="editable-field" id="basicinfo-f2"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('basicinfo-f2')">수정</button><button class="fc-btn fc-del" onclick="delField('basicinfo-f2')">삭제</button></div>
+          <div class="field"><label>이메일 <span class="required">*</span></label><input type="email" placeholder="example@company.com"/></div>
+        </div>
+        <div class="form-card">
+          <div class="section-title">B. 지원 필요사항</div>
+          <div class="editable-field" id="basicinfo-f3"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('basicinfo-f3')">수정</button><button class="fc-btn fc-del" onclick="delField('basicinfo-f3')">삭제</button></div>
+          <div class="field">
+            <label>개인 노트북 지참 여부 <span class="required">*</span></label>
+            <div class="hint">회사 지급 PC가 아닌 개인 노트북 기준입니다</div>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="laptop" value="yes"> 개인 노트북 지참 가능</label>
+              <label class="radio-item"><input type="radio" name="laptop" value="no"> 대여 PC 필요</label>
+            </div>
+          </div>
+          <div class="field" style="margin-top:1rem">
+            <label>AI Tool (Claude Max) 초대용 개인 이메일 <span class="required">*</span></label>
+            <div class="hint">Claude Max invite를 받을 개인 이메일을 입력해 주세요</div>
+            <input type="email" placeholder="personal@gmail.com"/>
+          </div>
+          <div class="editable-field" id="basicinfo-f4"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('basicinfo-f4')">수정</button><button class="fc-btn fc-del" onclick="delField('basicinfo-f4')">삭제</button></div>
+          <div class="field">
+            <label>Google Drive 초대용 Google 이메일 <span class="required">*</span></label>
+            <div class="hint">@gmail.com 계정만 입력해 주세요</div>
+            <input type="email" placeholder="personal@gmail.com"/>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="showToast('임시저장되었습니다.')">임시저장</button>
+          <button class="btn btn-primary" onclick="submitForm('basicinfo')">제출하기 →</button>
+        </div>
+      </div>
+      <div class="sub-panel" id="basicinfo-raw">
+        <div class="form-card">
+          <div class="raw-header">
+            <div><div class="raw-header-title">수합된 응답 데이터</div><div class="raw-count">총 0건</div></div>
+            <button class="raw-export-btn">CSV 내보내기</button>
+          </div>
+          <div class="raw-table-wrap">
+            <table class="raw-table">
+              <thead><tr><th>#</th><th>제출일시</th><th>이름</th><th>소속</th><th>이메일</th><th>노트북</th><th>Claude 이메일</th><th>Drive 이메일</th></tr></thead>
+              <tbody><tr><td colspan="8"><div class="raw-empty">아직 제출된 응답이 없습니다.<br>링크를 배포하고 응답을 기다려 주세요.</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 사전 서베이 ── -->
+    <div class="page" id="page-presurvey">
+      <button class="back-btn" onclick="goToDetail()">← 과정 관리로</button>
+      <div class="page-top-row">
+        <div class="page-header">
+        <div><h2>사전 서베이</h2><p>과정 시작 전 업무 현황 베이스라인을 수집합니다.</p></div>
+        <button class="edit-btn" id="editbtn-presurvey" onclick="toggleEdit('presurvey')" title="편집 모드">✏️ 수정하기</button>
+      </div>
+      <div class="edit-mode-bar" id="editbar-presurvey">
+        <span class="edit-mode-label">✏️ 편집 모드 — 항목을 수정·삭제하거나 새 항목을 추가할 수 있습니다</span>
+        <div class="edit-mode-actions"><button class="add-field-btn" onclick="openAddField('presurvey')">＋ 항목 추가</button></div>
+      </div>
+      </div>
+      <div class="sub-tab-bar">
+        <button class="sub-tab active" onclick="switchSubTab('presurvey','form',this)">📝 응답 페이지</button>
+        <button class="sub-tab" onclick="switchSubTab('presurvey','raw',this)">📊 수합 데이터</button>
+      </div>
+      <div class="sub-panel active" id="presurvey-form">
+        <div class="share-card">
+          <div class="share-title">배포 링크 · QR 코드</div>
+          <div class="share-row">
+            <div class="share-url-block">
+              <div class="share-url-label">페이지 URL</div>
+              <div class="share-url-input-row">
+                <input class="share-url-input" id="url-presurvey" readonly value="GitHub Pages 배포 후 자동 생성됩니다"/>
+                <button class="share-copy-btn" onclick="copyUrl('url-presurvey',this)">복사</button>
+              </div>
+            </div>
+            <div class="share-divider"></div>
+            <div class="share-qr-block">
+              <div class="qr-box" id="qr-presurvey"></div>
+              <div class="qr-label">QR 코드</div>
+              <button class="qr-download-btn" onclick="downloadQR('qr-presurvey','사전서베이')">이미지 저장</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="section-title">사전 서베이</div>
+          <div class="editable-field" id="presurvey-f0"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('presurvey-f0')">수정</button><button class="fc-btn fc-del" onclick="delField('presurvey-f0')">삭제</button></div>
+          <div class="field"><div class="q-category">Time</div><div class="q-num">1.1</div><div class="q-title">현재 반복적인 업무를 처리하는 데 하루 평균 얼마나 소요되나요?</div><div class="tbd-box"><div class="tbd-label">문항 확정 전</div><p>응답 선택지는 추후 확정 예정입니다</p></div></div>
+          <div class="editable-field" id="presurvey-f1"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('presurvey-f1')">수정</button><button class="fc-btn fc-del" onclick="delField('presurvey-f1')">삭제</button></div>
+          <div class="field"><div class="q-category">Time</div><div class="q-num">1.2</div><div class="q-title">현재 여유 시간이 생긴다면 주로 어디에 쓰고 싶으신가요?</div><div class="tbd-box"><div class="tbd-label">문항 확정 전</div><p>응답 선택지는 추후 확정 예정입니다</p></div></div>
+          <div class="editable-field" id="presurvey-f2"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('presurvey-f2')">수정</button><button class="fc-btn fc-del" onclick="delField('presurvey-f2')">삭제</button></div>
+          <div class="field"><div class="q-category">Quality</div><div class="q-num">2.1</div><div class="q-title">현재 본인 산출물의 품질(정확성·완결성)을 스스로 몇 점으로 평가하시나요?</div><div class="tbd-box"><div class="tbd-label">문항 확정 전</div><p>응답 선택지는 추후 확정 예정입니다</p></div></div>
+          <div class="editable-field" id="presurvey-f3"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('presurvey-f3')">수정</button><button class="fc-btn fc-del" onclick="delField('presurvey-f3')">삭제</button></div>
+          <div class="field"><div class="q-category">Quality</div><div class="q-num">2.2</div><div class="q-title">현재 산출물 완성도를 높이는 데 가장 큰 장애 요인은 무엇인가요?</div><textarea rows="3" placeholder="자유롭게 작성해 주세요"></textarea></div>
+          <div class="editable-field" id="presurvey-f4"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('presurvey-f4')">수정</button><button class="fc-btn fc-del" onclick="delField('presurvey-f4')">삭제</button></div>
+          <div class="field"><div class="q-category">Impact</div><div class="q-num">3.1</div><div class="q-title">현재 본인 산출물이 팀·조직 의사결정에 활용되는 비율은 어느 정도인가요?</div><div class="tbd-box"><div class="tbd-label">문항 확정 전</div><p>응답 선택지는 추후 확정 예정입니다</p></div></div>
+          <div class="editable-field" id="presurvey-f5"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('presurvey-f5')">수정</button><button class="fc-btn fc-del" onclick="delField('presurvey-f5')">삭제</button></div>
+          <div class="field"><div class="q-category">Impact</div><div class="q-num">3.2</div><div class="q-title">산출물의 의사결정 활용도를 높이려면 무엇이 가장 필요하다고 생각하시나요?</div><textarea rows="3" placeholder="자유롭게 작성해 주세요"></textarea></div>
+          <div class="editable-field" id="presurvey-f6"><div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('presurvey-f6')">수정</button><button class="fc-btn fc-del" onclick="delField('presurvey-f6')">삭제</button></div>
+          <div class="field"><div class="q-category">Transfer</div><div class="q-num">4</div><div class="q-title">이번 과정을 통해 AI로 가장 개선하고 싶은 업무와 기대하는 변화를 구체적으로 적어주세요.</div><textarea rows="4" placeholder="자유롭게 작성해 주세요"></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="showToast('임시저장되었습니다.')">임시저장</button>
+          <button class="btn btn-primary" onclick="submitForm('presurvey')">제출하기 →</button>
+        </div>
+      </div>
+      <div class="sub-panel" id="presurvey-raw">
+        <div class="form-card">
+          <div class="raw-header">
+            <div><div class="raw-header-title">수합된 응답 데이터</div><div class="raw-count">총 0건</div></div>
+            <button class="raw-export-btn">CSV 내보내기</button>
+          </div>
+          <div class="raw-table-wrap">
+            <table class="raw-table">
+              <thead><tr><th>#</th><th>제출일시</th><th>이름</th><th>소속</th><th>1.1 Time</th><th>1.2 Time</th><th>2.1 Quality</th><th>2.2 Quality</th><th>3.1 Impact</th><th>3.2 Impact</th><th>4 Transfer</th></tr></thead>
+              <tbody><tr><td colspan="11"><div class="raw-empty">아직 제출된 응답이 없습니다.<br>링크를 배포하고 응답을 기다려 주세요.</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 만족도 조사 ── -->
+    <div class="page" id="page-satisfaction">
+      <button class="back-btn" onclick="goToDetail()">← 과정 관리로</button>
+      <div class="page-top-row">
+        <div class="page-header">
+        <div><h2>만족도 조사</h2><p>과정 운영 및 콘텐츠에 대한 솔직한 의견을 관리합니다.</p></div>
+        <button class="edit-btn" id="editbtn-satisfaction" onclick="toggleEdit('satisfaction')" title="편집 모드">✏️ 수정하기</button>
+      </div>
+      <div class="edit-mode-bar" id="editbar-satisfaction">
+        <span class="edit-mode-label">✏️ 편집 모드 — 항목을 수정·삭제하거나 새 항목을 추가할 수 있습니다</span>
+        <div class="edit-mode-actions"><button class="add-field-btn" onclick="openAddField('satisfaction')">＋ 항목 추가</button></div>
+      </div>
+      </div>
+      <div class="sub-tab-bar">
+        <button class="sub-tab active" onclick="switchSubTab('satisfaction','form',this)">📝 응답 페이지</button>
+        <button class="sub-tab" onclick="switchSubTab('satisfaction','raw',this)">📊 수합 데이터</button>
+      </div>
+      <!-- 응답 페이지 -->
+      <div class="sub-panel active" id="satisfaction-form">
+        <div class="share-card">
+          <div class="share-title">배포 링크 · QR 코드</div>
+          <div class="share-row">
+            <div class="share-url-block">
+              <div class="share-url-label">페이지 URL</div>
+              <div class="share-url-input-row">
+                <input class="share-url-input" id="url-satisfaction" readonly value="GitHub Pages 배포 후 자동 생성됩니다"/>
+                <button class="share-copy-btn" onclick="copyUrl('url-satisfaction',this)">복사</button>
+              </div>
+            </div>
+            <div class="share-divider"></div>
+            <div class="share-qr-block">
+              <div class="qr-box" id="qr-satisfaction"></div>
+              <div class="qr-label">QR 코드</div>
+              <button class="qr-download-btn" onclick="downloadQR('qr-satisfaction','만족도조사')">이미지 저장</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="coming-soon"><div class="cs-icon">⭐</div><div class="cs-title">준비 중입니다</div><p>만족도 조사 문항은 과정 종료 후 오픈될 예정입니다.</p></div>
+        </div>
+      </div>
+      <!-- RAW -->
+      <div class="sub-panel" id="satisfaction-raw">
+        <div class="form-card">
+          <div class="raw-header">
+            <div><div class="raw-header-title">수합된 응답 데이터</div><div class="raw-count">총 0건</div></div>
+            <button class="raw-export-btn">CSV 내보내기</button>
+          </div>
+          <div class="raw-table-wrap">
+            <table class="raw-table">
+              <thead><tr><th>#</th><th>제출일시</th><th>이름</th><th>소속</th><th>전반적 만족도</th><th>내용 만족도</th><th>강사 만족도</th><th>운영 만족도</th><th>의견</th></tr></thead>
+              <tbody><tr><td colspan="9"><div class="raw-empty">아직 제출된 응답이 없습니다.</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 사후 서베이 ── -->
+    <div class="page" id="page-postsurvey">
+      <button class="back-btn" onclick="goToDetail()">← 과정 관리로</button>
+      <div class="page-top-row">
+        <div class="page-header">
+        <div><h2>사후 서베이</h2><p>과정 수료 후 업무 변화를 측정합니다. 사전 서베이와 비교 분석됩니다.</p></div>
+        <button class="edit-btn" id="editbtn-postsurvey" onclick="toggleEdit('postsurvey')" title="편집 모드">✏️ 수정하기</button>
+      </div>
+      <div class="edit-mode-bar" id="editbar-postsurvey">
+        <span class="edit-mode-label">✏️ 편집 모드 — 항목을 수정·삭제하거나 새 항목을 추가할 수 있습니다</span>
+        <div class="edit-mode-actions"><button class="add-field-btn" onclick="openAddField('postsurvey')">＋ 항목 추가</button></div>
+      </div>
+      </div>
+      <div class="sub-tab-bar">
+        <button class="sub-tab active" onclick="switchSubTab('postsurvey','form',this)">📝 응답 페이지</button>
+        <button class="sub-tab" onclick="switchSubTab('postsurvey','raw',this)">📊 수합 데이터</button>
+      </div>
+      <!-- 응답 페이지 -->
+      <div class="sub-panel active" id="postsurvey-form">
+        <div class="share-card">
+          <div class="share-title">배포 링크 · QR 코드</div>
+          <div class="share-row">
+            <div class="share-url-block">
+              <div class="share-url-label">페이지 URL</div>
+              <div class="share-url-input-row">
+                <input class="share-url-input" id="url-postsurvey" readonly value="GitHub Pages 배포 후 자동 생성됩니다"/>
+                <button class="share-copy-btn" onclick="copyUrl('url-postsurvey',this)">복사</button>
+              </div>
+            </div>
+            <div class="share-divider"></div>
+            <div class="share-qr-block">
+              <div class="qr-box" id="qr-postsurvey"></div>
+              <div class="qr-label">QR 코드</div>
+              <button class="qr-download-btn" onclick="downloadQR('qr-postsurvey','사후서베이')">이미지 저장</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="coming-soon"><div class="cs-icon">📊</div><div class="cs-title">준비 중입니다</div><p>사후 서베이는 과정 종료 후 오픈될 예정입니다.</p></div>
+        </div>
+      </div>
+      <!-- RAW -->
+      <div class="sub-panel" id="postsurvey-raw">
+        <div class="form-card">
+          <div class="raw-header">
+            <div><div class="raw-header-title">수합된 응답 데이터</div><div class="raw-count">총 0건</div></div>
+            <button class="raw-export-btn">CSV 내보내기</button>
+          </div>
+          <div class="raw-table-wrap">
+            <table class="raw-table">
+              <thead><tr><th>#</th><th>제출일시</th><th>이름</th><th>소속</th><th>1.1 시간단축</th><th>1.2 시간활용</th><th>2.1 품질향상</th><th>2.2 기여요인</th><th>3.1 기여도</th><th>3.2 활용요인</th><th>4 전파사례</th></tr></thead>
+              <tbody><tr><td colspan="11"><div class="raw-empty">아직 제출된 응답이 없습니다.</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">＋ 과정 추가</div>
+    <div class="modal-field"><label>과정명 *</label><input type="text" id="m-title" placeholder="예: 재무제표 기반 경영의사결정"/></div>
+    <div class="modal-field"><label>과정 유형</label><input type="text" id="m-badge" placeholder="예: 재무과정, 전략과정"/></div>
+    <div class="modal-row">
+      <div class="modal-field"><label>과정 기간 *</label><input type="text" id="m-period" placeholder="예: 2026.09.01 – 09.03"/></div>
+      <div class="modal-field"><label>일수</label><input type="text" id="m-days" placeholder="예: 3일"/></div>
+    </div>
+    <div class="modal-field"><label>장소 *</label><input type="text" id="m-place" placeholder="예: 수송스퀘어 중강의장2"/></div>
+    <div class="modal-field"><label>입과 인원 *</label><input type="text" id="m-people" placeholder="예: 25명 예정"/></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-submit" onclick="addCourse()">과정 생성</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PAGE_URLS = {
+    basicinfo:    window.location.href.replace(/[^/]*$/,'') + 'basicinfo.html',
+    presurvey:    window.location.href.replace(/[^/]*$/,'') + 'presurvey.html',
+    satisfaction: window.location.href.replace(/[^/]*$/,'') + 'satisfaction.html',
+    postsurvey:   window.location.href.replace(/[^/]*$/,'') + 'postsurvey.html',
+  };
+  const PLACEHOLDER = 'GitHub Pages 배포 후 자동 생성됩니다';
+  let qrGenerated = {};
+
+  function showPage(key, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const labels = { home:'전체 과정', detail:'과정 관리', basicinfo:'기본 정보', presurvey:'사전 서베이', satisfaction:'만족도 조사', postsurvey:'사후 서베이' };
+    document.getElementById('page-' + key).classList.add('active');
+    document.getElementById('topbar-title').textContent = labels[key] || key;
+    if (btn) btn.classList.add('active');
+    if (PAGE_URLS[key] && !qrGenerated[key]) { generateQR(key); qrGenerated[key] = true; }
+  }
+
+  function switchSubTab(page, panel, btn) {
+    document.querySelectorAll('#page-' + page + ' .sub-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#page-' + page + ' .sub-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(page + '-' + panel).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function generateQR(key) {
+    const el = document.getElementById('qr-' + key);
+    const urlInput = document.getElementById('url-' + key);
+    if (!el) return;
+    const isDeployed = window.location.protocol !== 'file:';
+    if (!isDeployed) { el.innerHTML = '<div style="font-size:11px;color:#A89F94;text-align:center;padding:8px;line-height:1.4">배포 후<br>QR 생성</div>'; return; }
+    urlInput.value = PAGE_URLS[key];
+    el.innerHTML = '';
+    new QRCode(el, { text:PAGE_URLS[key], width:88, height:88, colorDark:'#1A1714', colorLight:'#FFFFFF', correctLevel:QRCode.CorrectLevel.M });
+  }
+
+  function copyUrl(inputId, btn) {
+    const val = document.getElementById(inputId).value;
+    if (val === PLACEHOLDER) return;
+    navigator.clipboard.writeText(val).then(() => {
+      btn.textContent = '복사됨 ✓'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function downloadQR(containerId, filename) {
+    const canvas = document.querySelector('#' + containerId + ' canvas');
+    if (!canvas) { alert('배포 후 QR 코드를 사용할 수 있습니다.'); return; }
+    const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = filename + '_QR.png'; a.click();
+  }
+
+  function enterCourse(title, badge, period, days, place, people) {
+    document.getElementById('detail-title').textContent = title;
+    document.getElementById('detail-badge').textContent = badge;
+    document.getElementById('detail-period').textContent = period;
+    document.getElementById('detail-days').textContent = days;
+    document.getElementById('detail-place').textContent = place;
+    document.getElementById('detail-people').textContent = people;
+    document.getElementById('nav-course-label').style.display = '';
+    document.getElementById('nav-basicinfo').style.display = '';
+    document.getElementById('nav-presurvey').style.display = '';
+    document.getElementById('nav-satisfaction').style.display = '';
+    document.getElementById('nav-postsurvey').style.display = '';
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    showPage('detail', null);
+    document.getElementById('topbar-title').textContent = title;
+  }
+
+  function goToStep(pageKey) {
+    const navMap = { basicinfo:'nav-basicinfo', presurvey:'nav-presurvey', satisfaction:'nav-satisfaction', postsurvey:'nav-postsurvey' };
+    const btn = document.getElementById(navMap[pageKey]);
+    showPage(pageKey, btn);
+  }
+
+  function goToDetail() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    showPage('detail', null);
+    document.getElementById('topbar-title').textContent = document.getElementById('detail-title').textContent;
+  }
+
+  function goBack() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('.nav-item').classList.add('active');
+    showPage('home', null);
+  }
+
+  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+  function addCourse() {
+    const title  = document.getElementById('m-title').value.trim();
+    const badge  = document.getElementById('m-badge').value.trim();
+    const period = document.getElementById('m-period').value.trim();
+    const days   = document.getElementById('m-days').value.trim();
+    const place  = document.getElementById('m-place').value.trim();
+    const people = document.getElementById('m-people').value.trim();
+    if (!title || !period || !place || !people) { alert('필수 항목을 모두 입력해 주세요.'); return; }
+    const card = document.createElement('div');
+    card.className = 'course-card';
+    card.onclick = () => enterCourse(title, badge, period, days, place, people);
+    card.innerHTML = `
+      <div class="course-card-top"><div class="card-top-row">
+        <div class="card-course-title">${title}</div>
+        ${badge ? `<div class="pill-badge">${badge}</div>` : ''}
+      </div></div>
+      <div class="course-card-body">
+        <div class="card-meta">
+          <div class="card-meta-row">📅 ${period}${days ? ' (' + days + ')' : ''}</div>
+          <div class="card-meta-row">📍 ${place}</div>
+          <div class="card-meta-row">👥 ${people}</div>
+        </div>
+        <div class="card-mini-progress">
+          <div class="mini-dot current"></div>
+          <div class="mini-dot"></div><div class="mini-dot"></div>
+          <div class="mini-dot"></div><div class="mini-dot"></div>
+          <span class="mini-progress-label">정보수집 진행 중</span>
+        </div>
+      </div>`;
+    document.getElementById('course-grid').appendChild(card);
+    ['m-title','m-badge','m-period','m-days','m-place','m-people'].forEach(id => document.getElementById(id).value = '');
+    closeModal();
+  }
+
+
+  // ============================================================
+  // ✅ 배포 후 여기에 Apps Script 웹훅 URL을 붙여넣으세요
+  // ============================================================
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwojzRa-n507JDa_KqBnNjWJR1xye-D3zZhrzipTaOHdD2Vy_IC-7c6KHGJ3X36t1nqsQ/exec';
+
+  async function submitForm(formType) {
+    const btn = event.currentTarget;
+    const originalText = btn.textContent;
+
+    // 간단 유효성 검사
+    const page = document.getElementById('page-' + (formType === 'basicinfo' ? 'basicinfo' : formType === 'presurvey' ? 'presurvey' : formType === 'satisfaction' ? 'satisfaction' : 'postsurvey'));
+    const required = page ? page.querySelectorAll('input[required], textarea[required]') : [];
+    for (const el of required) {
+      if (!el.value.trim()) { alert('필수 항목을 모두 입력해 주세요.'); el.focus(); return; }
+    }
+
+    // 데이터 수집
+    let payload = { formType };
+    if (formType === 'basicinfo') {
+      const inputs = page.querySelectorAll('input[type=text], input[type=email]');
+      const radios = page.querySelectorAll('input[type=radio]:checked');
+      payload.name        = inputs[0]?.value || '';
+      payload.company     = inputs[1]?.value || '';
+      payload.email       = inputs[2]?.value || '';
+      payload.laptop      = radios[0]?.value === 'yes' ? '지참 가능' : radios[0]?.value === 'no' ? '대여 필요' : '';
+      payload.claudeEmail = inputs[3]?.value || '';
+      payload.driveEmail  = inputs[4]?.value || '';
+    } else if (formType === 'presurvey') {
+      const inputs  = page.querySelectorAll('input[type=text], input[type=email]');
+      const areas   = page.querySelectorAll('textarea');
+      const radios  = page.querySelectorAll('input[type=radio]:checked');
+      payload.name    = inputs[0]?.value || '';
+      payload.company = inputs[1]?.value || '';
+      payload.q11 = radios[0]?.value || ''; payload.q12 = radios[1]?.value || '';
+      payload.q21 = radios[2]?.value || ''; payload.q22 = areas[0]?.value || '';
+      payload.q31 = radios[3]?.value || ''; payload.q32 = areas[1]?.value || '';
+      payload.q4  = areas[2]?.value || '';
+    } else if (formType === 'postsurvey') {
+      const areas  = page.querySelectorAll('textarea');
+      const radios = page.querySelectorAll('input[type=radio]:checked');
+      payload.name    = ''; payload.company = '';
+      payload.q11 = radios[0]?.value || ''; payload.q12 = radios[1]?.value || '';
+      payload.q21 = radios[2]?.value || ''; payload.q22 = areas[0]?.value || '';
+      payload.q31 = radios[3]?.value || ''; payload.q32 = areas[1]?.value || '';
+      payload.q4  = areas[2]?.value || '';
+    }
+
+    // 제출
+    btn.textContent = '제출 중...';
+    btn.disabled = true;
+    try {
+      if (WEBHOOK_URL === 'https://script.google.com/macros/s/AKfycbwojzRa-n507JDa_KqBnNjWJR1xye-D3zZhrzipTaOHdD2Vy_IC-7c6KHGJ3X36t1nqsQ/exec') {
+        // 개발 모드: 실제 전송 없이 콘솔 출력
+        console.log('[DEV] Payload:', payload);
+        await new Promise(r => setTimeout(r, 800));
+        showToast('✅ (개발 모드) 제출 성공! 웹훅 URL을 설정하면 실제 전송됩니다.');
+      } else {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        showToast('✅ 제출이 완료되었습니다. 감사합니다!');
+      }
+    } catch (err) {
+      showToast('❌ 제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      console.error(err);
+    } finally {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  }
+
+  function showToast(msg) {
+    let toast = document.getElementById('hrd-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'hrd-toast';
+      toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1A1714;color:white;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;font-family:Pretendard,sans-serif;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.2);transition:opacity 0.3s;';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3500);
+  }
+
+
+  // ── EDITOR MODE ──────────────────────────────────────────────────────────
+  let currentEditPage = null;
+
+  function toggleEdit(pageId) {
+    const bar = document.getElementById('editbar-' + pageId);
+    const btn = document.getElementById('editbtn-' + pageId);
+    const panel = document.getElementById(pageId + '-form');
+    if (!panel) return;
+    const isOn = panel.classList.toggle('editing-on');
+    bar.classList.toggle('show', isOn);
+    btn.classList.toggle('editing', isOn);
+    btn.textContent = isOn ? '✅ 편집 완료' : '✏️ 수정하기';
+    currentEditPage = isOn ? pageId : null;
+  }
+
+  function editField(fid) {
+    const el = document.getElementById(fid);
+    if (!el) return;
+    // Check if overlay already open
+    let overlay = el.querySelector('.field-edit-overlay');
+    if (overlay) { overlay.classList.toggle('open'); return; }
+    // Get current label text
+    const labelEl = el.querySelector('label');
+    const hintEl  = el.querySelector('.hint');
+    const qTitle  = el.querySelector('.q-title');
+    const currentLabel = labelEl ? labelEl.innerText.replace('*','').trim() : (qTitle ? qTitle.innerText.trim() : '');
+    const currentHint  = hintEl  ? hintEl.innerText.trim() : '';
+    overlay = document.createElement('div');
+    overlay.className = 'field-edit-overlay open';
+    overlay.innerHTML = `
+      <div class="feo-row"><label>항목 제목</label><input type="text" id="feo-label-${fid}" value="${currentLabel}"/></div>
+      ${currentHint ? `<div class="feo-row"><label>안내 문구 (hint)</label><input type="text" id="feo-hint-${fid}" value="${currentHint}"/></div>` : ''}
+      <div class="feo-actions">
+        <button class="feo-cancel" onclick="this.closest('.field-edit-overlay').classList.remove('open')">취소</button>
+        <button class="feo-save" onclick="saveField('${fid}')">저장</button>
+      </div>`;
+    el.appendChild(overlay);
+  }
+
+  function saveField(fid) {
+    const el = document.getElementById(fid);
+    const labelInput = document.getElementById('feo-label-' + fid);
+    const hintInput  = document.getElementById('feo-hint-'  + fid);
+    if (labelInput) {
+      const labelEl = el.querySelector('label');
+      const qTitle  = el.querySelector('.q-title');
+      if (labelEl)  labelEl.childNodes[0].textContent = labelInput.value + ' ';
+      if (qTitle)   qTitle.textContent = labelInput.value;
+    }
+    if (hintInput) {
+      const hintEl = el.querySelector('.hint');
+      if (hintEl) hintEl.textContent = hintInput.value;
+    }
+    el.querySelector('.field-edit-overlay').classList.remove('open');
+  }
+
+  function delField(fid) {
+    if (!confirm('이 항목을 삭제할까요?')) return;
+    const el = document.getElementById(fid);
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.2s';
+    setTimeout(() => el.remove(), 200);
+  }
+
+  // ── ADD FIELD ─────────────────────────────────────────────────────────────
+  let addFieldTarget = null;
+
+  function openAddField(pageId) {
+    addFieldTarget = pageId;
+    document.getElementById('add-field-modal').classList.add('open');
+  }
+  function closeAddField() {
+    document.getElementById('add-field-modal').classList.remove('open');
+    addFieldTarget = null;
+  }
+
+  function confirmAddField() {
+    const title    = document.getElementById('afm-title-input').value.trim();
+    const hint     = document.getElementById('afm-hint-input').value.trim();
+    const type     = document.getElementById('afm-type-input').value;
+    const category = document.getElementById('afm-cat-input').value.trim();
+    if (!title) { alert('항목 제목을 입력해 주세요.'); return; }
+
+    const panel = document.getElementById(addFieldTarget + '-form');
+    const formCards = panel.querySelectorAll('.form-card');
+    const targetCard = formCards[formCards.length - 1];
+    const btnRow = panel.querySelector('.btn-row');
+
+    const fid = addFieldTarget + '-f' + Date.now();
+    const controls = `<div class="field-edit-controls"><button class="fc-btn fc-edit" onclick="editField('${fid}')">수정</button><button class="fc-btn fc-del" onclick="delField('${fid}')">삭제</button></div>`;
+
+    let inputHtml = '';
+    if (type === 'text')     inputHtml = `<input type="text" placeholder="응답을 입력해 주세요"/>`;
+    if (type === 'email')    inputHtml = `<input type="email" placeholder="example@email.com"/>`;
+    if (type === 'textarea') inputHtml = `<textarea rows="3" placeholder="자유롭게 작성해 주세요"></textarea>`;
+    if (type === 'radio')    inputHtml = `<div class="radio-group"><label class="radio-item"><input type="radio" name="${fid}r"> 선택지 1</label><label class="radio-item"><input type="radio" name="${fid}r"> 선택지 2</label></div>`;
+    if (type === 'select5')  inputHtml = `<div class="radio-group">${[1,2,3,4,5].map(n=>`<label class="radio-item"><input type="radio" name="${fid}s"> ${n}번 선택지</label>`).join('')}</div>`;
+
+    const newField = document.createElement('div');
+    newField.className = 'editable-field field';
+    newField.id = fid;
+    newField.innerHTML = `${controls}
+      ${category ? `<div class="q-category">${category}</div>` : ''}
+      <label class="q-title">${title}</label>
+      ${hint ? `<div class="hint">${hint}</div>` : ''}
+      ${inputHtml}`;
+
+    if (targetCard) targetCard.appendChild(newField);
+    else if (btnRow) btnRow.parentNode.insertBefore(newField, btnRow);
+
+    closeAddField();
+    document.getElementById('afm-title-input').value = '';
+    document.getElementById('afm-hint-input').value = '';
+    document.getElementById('afm-cat-input').value = '';
+  }
+
+
+  function setAvatar(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById('profile-img');
+      const placeholder = document.getElementById('profile-placeholder');
+      img.src = e.target.result;
+      img.style.display = 'block';
+      placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  function editProfileName() {
+    const nameEl = document.getElementById('profile-name');
+    const current = nameEl.textContent;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = current;
+    input.style.cssText = 'font-size:13px;font-weight:800;font-family:Pretendard,sans-serif;border:1.5px solid var(--orange);border-radius:6px;padding:2px 6px;width:100px;outline:none;text-align:center;';
+    nameEl.replaceWith(input);
+    input.focus();
+    input.select();
+    function done() {
+      const newName = document.createElement('div');
+      newName.id = 'profile-name';
+      newName.className = 'profile-name';
+      newName.title = '이름 수정';
+      newName.textContent = input.value || current;
+      newName.onclick = editProfileName;
+      input.replaceWith(newName);
+    }
+    input.addEventListener('blur', done);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') done(); });
+  }
+
+  document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+</script>
+
+<!-- ADD FIELD MODAL -->
+<div class="add-field-modal" id="add-field-modal">
+  <div class="afm-box">
+    <div class="afm-title">＋ 항목 추가</div>
+    <div class="afm-row"><label>항목 제목 *</label><input type="text" id="afm-title-input" placeholder="예: 부서명, 직급, 업무 경력"/></div>
+    <div class="afm-row"><label>응답 유형 *</label>
+      <select id="afm-type-input">
+        <option value="text">단답형 (텍스트)</option>
+        <option value="email">이메일</option>
+        <option value="textarea">장문형 (주관식)</option>
+        <option value="radio">객관식 (2지선다)</option>
+        <option value="select5">객관식 (5점 척도)</option>
+      </select>
+    </div>
+    <div class="afm-row"><label>카테고리 (선택)</label><input type="text" id="afm-cat-input" placeholder="예: Time, Quality, Impact"/></div>
+    <div class="afm-row"><label>안내 문구 (선택)</label><input type="text" id="afm-hint-input" placeholder="응답자에게 보여줄 부연 설명"/></div>
+    <div class="afm-btns">
+      <button class="afm-cancel" onclick="closeAddField()">취소</button>
+      <button class="afm-add" onclick="confirmAddField()">추가하기</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
