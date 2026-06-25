@@ -787,7 +787,7 @@
   // ============================================================
   // ✅ 배포 후 여기에 Apps Script 웹훅 URL을 붙여넣으세요
   // ============================================================
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwojzRa-n507JDa_KqBnNjWJR1xye-D3zZhrzipTaOHdD2Vy_IC-7c6KHGJ3X36t1nqsQ/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbymjkUyCZFXBGf-bI8GIrMujOE6ywg8bpVAmQOKehMlyMnmYNLB6l5u2jhsqBG3QUDe/exec';
 
   async function submitForm(formType) {
     const btn = event.currentTarget;
@@ -835,7 +835,7 @@
     btn.textContent = '제출 중...';
     btn.disabled = true;
     try {
-      if (WEBHOOK_URL === 'https://script.google.com/macros/s/AKfycbwojzRa-n507JDa_KqBnNjWJR1xye-D3zZhrzipTaOHdD2Vy_IC-7c6KHGJ3X36t1nqsQ/exec') {
+      if (WEBHOOK_URL === 'https://script.google.com/macros/s/AKfycbymjkUyCZFXBGf-bI8GIrMujOE6ywg8bpVAmQOKehMlyMnmYNLB6l5u2jhsqBG3QUDe/exec') {
         // 개발 모드: 실제 전송 없이 콘솔 출력
         console.log('[DEV] Payload:', payload);
         await new Promise(r => setTimeout(r, 800));
